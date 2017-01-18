@@ -95,9 +95,10 @@ var initResult = function(result){
 }
 
 // startScan
-var startScanSuccess = function(result){
+function startScanSuccess(result){
     if(result.status == "scanStarted"){
         alert("Scanning for device...");
+        startScanSuccess(result);
     }
     else if(result.status == "scanResult"){
         alert(result.name);
