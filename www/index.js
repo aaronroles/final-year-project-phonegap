@@ -3,7 +3,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 var updates = 0;
 var currentSpeed = 0;
-var bleDevices = [];
+var bleDevices = 0;
 
 function onDeviceReady(){
     //document.addEventListener("pause", onPause, false);
@@ -51,13 +51,6 @@ function onDeviceReady(){
 //
 // ! -- Look at running code for when backgroundMode is enabled ! --
 //
-
-// Don't need these functions right now
-//function onPause(){
-//}
-//
-//function onResume(){
-//}
 
 // When location is successfully retrieved
 var onSuccess = function(position){
@@ -107,13 +100,9 @@ var startScanSuccess = function(result){
         alert("Scanning for device...");
     }
     else if(result.status == "scanResult"){
+        alert(result.name);
         bluetoothle.stopScan(stopScanSuccess, stopScanError);
         bluetoothle.connect(connectSuccess, connectError, params);
-        //bleDevices.push(result);
-        //document.getElementById('ble').innerHTML = 
-        //    "Device name: " + result.name + 
-        //    "<br> Strength: " + result.rssi +
-        //    "<br> Address: " + result.address
     }
 }
 
@@ -123,7 +112,7 @@ var startScanError = function(){
 
 // stopScan 
 var stopScanSuccess = function(result){
-    alert("stopped scanning");
+    alert(result.status);
 }
 
 var stopScanError = function(){
