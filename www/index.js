@@ -85,8 +85,7 @@ var initResult = function(result){
     if(result.status == "enabled"){
         // enabled 
         alert("Bluetooth LE is enabled");
-        enabled = true;
-        //bluetoothle.startScan(startScanSuccess, startScanError, {services: []} );
+        startScan();
     }
     else{
         // Prompt the user to enable bluetooth
@@ -94,15 +93,8 @@ var initResult = function(result){
     }
 }
 
-if(enabled){
-    startScan();
-}
-
-
-
 // startScan
 function startScan(){
-    scanning = true;
     bluetoothle.startScan(startScanSuccess, startScanError, {});
 }
 
@@ -149,11 +141,11 @@ var connectError = function(){
 
 // enable
 var enableSuccess = function(){
-    enabled = true;
+    startScan();
 }
 
 var enableError = function(){
-    enabled = false;
+    alert("bluetooth enable error");
 }
 
 // discover
