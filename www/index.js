@@ -108,8 +108,8 @@ function startScanSuccess(result){
     }
 }
 
-var startScanError = function(){
-    alert("startScanError");
+var startScanError = function(error){
+    alert(error.message);
 }
 
 // stopScan 
@@ -117,8 +117,8 @@ var stopScanSuccess = function(result){
     alert(result.status);
 }
 
-var stopScanError = function(){
-    alert("stopScanError");
+var stopScanError = function(error){
+    alert(error.message);
 }
 
 // connect
@@ -135,8 +135,8 @@ var connectSuccess = function(result){
     }
 }
 
-var connectError = function(){
-    alert("connectError");
+var connectError = function(error){
+    alert(error.message);
 }
 
 // enable
@@ -144,8 +144,8 @@ var enableSuccess = function(){
     startScan();
 }
 
-var enableError = function(){
-    alert("bluetooth enable error");
+var enableError = function(error){
+    alert(error.message);
 }
 
 // discover
@@ -153,6 +153,6 @@ var discoverSuccess = function(result){
     // Discover success
 }
 
-var discoverError = function(){
-    alert("Discovery error");
+var discoverError = function(error){
+    alert(error.message);
 }
