@@ -2,12 +2,13 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 
 var updates = 0;
-var currentSpeed = 0;
+var km = 0;
 var bleDevices = 0;
+var enabled = false;
+var scanning = false;
+var scanAllowed = true;
 
 function onDeviceReady(){
-    //document.addEventListener("pause", onPause, false);
-    //document.addEventListener("resume", onResume, false);
     alert("Device Ready");
 
     // Start watching location
@@ -54,8 +55,7 @@ function onDeviceReady(){
 
 // When location is successfully retrieved
 var onSuccess = function(position){
-    var km = position.coords.speed * 3.6;
-    currentSpeed = position.coords.speed * 3.6;
+    km = position.coords.speed * 3.6;
     updates++;
 
     document.getElementById("info").innerHTML = 
@@ -63,7 +63,6 @@ var onSuccess = function(position){
         'Updates: '     + updates + '<br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
-        //'Accuracy: '    + position.coords.accuracy + '<br>' +
         'Speed: '       + km + ' km/h';
 
         if(position.coords.speed > 0){
@@ -84,9 +83,10 @@ var onError = function(position){
 var initResult = function(result){
     // If the user has enabled bluetooth
     if(result.status == "enabled"){
-        //alert("bluetoothle enabled");
-        // Start scanning for other bluetoothle devices 
-        bluetoothle.startScan(startScanSuccess, startScanError, {services: []} );
+        // enabled 
+        alert("Bluetooth LE is enabled");
+        enabled = true;
+        //bluetoothle.startScan(startScanSuccess, startScanError, {services: []} );
     }
     else{
         // Prompt the user to enable bluetooth
@@ -94,16 +94,25 @@ var initResult = function(result){
     }
 }
 
+if(enabled){
+    startScan();
+}
+
+
+
 // startScan
+function startScan(){
+    scanning = true;
+    bluetoothle.startScan(startScanSuccess, startScanError, {});
+}
+
 function startScanSuccess(result){
     if(result.status == "scanStarted"){
+        // scanning
         alert("Scanning for device...");
-        startScanSuccess(result);
     }
     else if(result.status == "scanResult"){
-        alert(result.name);
-        bluetoothle.stopScan(stopScanSuccess, stopScanError);
-        bluetoothle.connect(connectSuccess, connectError, params);
+        connect(result.name, result.address);
     }
 }
 
@@ -121,10 +130,37 @@ var stopScanError = function(){
 }
 
 // connect
+function connect(name, address){
+    alert("Connecting to " + name);
+    bluetoothle.stopScan(stopScanSuccess, stopScanError);
+    bluetoothle.connect(connectSuccess, connectError, {address: address} );
+}
+
 var connectSuccess = function(result){
-    alert("Connected to device")
+    alert("Connected to device");
+    if(result.status == "connected"){
+        bluetoothle.discover(discoverSuccess, discoverError, {address: result.address})
+    }
 }
 
 var connectError = function(){
     alert("connectError");
+}
+
+// enable
+var enableSuccess = function(){
+    enabled = true;
+}
+
+var enableError = function(){
+    enabled = false;
+}
+
+// discover
+var discoverSuccess = function(result){
+    // Discover success
+}
+
+var discoverError = function(){
+    alert("Discovery error");
 }
