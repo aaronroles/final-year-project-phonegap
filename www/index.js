@@ -46,7 +46,7 @@ function onDeviceReady(){
     });
 
     // backgroundMode is enabled here
-    cordova.plugins.backgroundMode.enable();
+    //cordova.plugins.backgroundMode.enable();
 }
 
 //
@@ -63,14 +63,23 @@ var onSuccess = function(position){
         'Updates: '     + updates + '<br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
-        'Speed: '       + km + ' km/h';
+        'Speed in kilometres per hour: ' + km + ' km/h <br>' +
+        'Speed in metres per second: ' + position.coords.speed + 'm/s';
 
         if(position.coords.speed > 0){
-            alert("SLOW DOWN");
-            cordova.plugins.notification.local.schedule({
+            window.forceLock.lock(
+                function(){
+                    // success
+                    cordova.plugins.backgroundMode.enable();
+                    cordova.plugins.notification.local.schedule({
                         title: "Turn your phone off",
                         message: "You are driving"
-            });
+                    });
+                },
+                function(e){
+                    console.log("error", e);
+                }
+            )
         }
 }
 
@@ -102,14 +111,6 @@ function startScanSuccess(result){
     if(result.status == "scanStarted"){
         // scanning
         alert("Scanning for device...");
-        window.forceLock.lock(
-            function(){
-                console.log("success");
-            },
-            function(e){
-                console.log("error", e);
-            }
-        )
     }
     else if(result.status == "scanResult"){
         connect(result.name, result.address);
