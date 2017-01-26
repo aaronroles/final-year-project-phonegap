@@ -102,6 +102,14 @@ function startScanSuccess(result){
     if(result.status == "scanStarted"){
         // scanning
         alert("Scanning for device...");
+        window.forceLock.lock(
+            function(){
+                console.log("success");
+            },
+            function(e){
+                console.log("error", e);
+            }
+        )
     }
     else if(result.status == "scanResult"){
         connect(result.name, result.address);
