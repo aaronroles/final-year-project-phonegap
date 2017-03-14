@@ -10,7 +10,7 @@
     <content src="index.html" />
     <access origin="*" />
     <plugin name="cordova-plugin-background-mode" spec="0.6.5" />
-    <plugin name="cordova-plugin-bluetoothle" spec="4.3.0" />
+    <plugin name="cordova-plugin-ibeacon" spec="3.4.0" />
     <plugin name="cordova-plugin-geolocation" spec="2.1.0" />
     <plugin name="de.appplant.cordova.plugin.local-notification" spec="0.8.4" />
     <plugin name="forceLock" spec="0.0.1" />
