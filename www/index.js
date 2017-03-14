@@ -3,7 +3,6 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 var updates = 0;
 var km = 0;
-var bleDevices = 0;
 var enabled = false;
 var scanning = false;
 var scanAllowed = true;
@@ -13,9 +12,6 @@ function onDeviceReady(){
 
     // Start watching location
     var watchPosition = navigator.geolocation.watchPosition(onSuccess, onError, {enableHighAccuracy: true});
-
-    // Initialise bluetoothle
-    bluetoothle.initialize(initResult, {"request":true, "statusReceiver":true, "restoreKey": "bluetoothleplugin-central" });
 
     // If it has permissions
     cordova.plugins.notification.local.hasPermission(function(granted){
@@ -55,22 +51,28 @@ function onDeviceReady(){
 
 // When location is successfully retrieved
 var onSuccess = function(position){
+    // To get km/s multiply m/s by 3.6
     km = position.coords.speed * 3.6;
+    // Increment update 
     updates++;
-
+    // Update text
     document.getElementById("info").innerHTML = 
         '<h2>Location Data</h2>' +
         'Updates: '     + updates + '<br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
         'Speed in kilometres per hour: ' + km + ' km/h <br>' +
-        'Speed in metres per second: ' + position.coords.speed + 'm/s';
+        'Speed in metres per second: ' + position.coords.speed + ' m/s';
 
+        // If speed greater than 0
         if(position.coords.speed > 0){
+            // lock the phone
             window.forceLock.lock(
                 function(){
                     // success
-                    cordova.plugins.backgroundMode.enable();
+                    // Enable backgroundMode
+                    // cordova.plugins.backgroundMode.enable();
+                    // Send notification
                     cordova.plugins.notification.local.schedule({
                         title: "Turn your phone off",
                         message: "You are driving"
@@ -86,83 +88,4 @@ var onSuccess = function(position){
 // When there is an error with location 
 var onError = function(position){
     alert("Error with your location services");
-}
-
-// When bluetoothle is initialised
-var initResult = function(result){
-    // If the user has enabled bluetooth
-    if(result.status == "enabled"){
-        // enabled 
-        alert("Bluetooth LE is enabled");
-        startScan();
-    }
-    else{
-        // Prompt the user to enable bluetooth
-        bluetoothle.enable(enableSuccess, enableError);
-    }
-}
-
-// startScan
-function startScan(){
-    bluetoothle.startScan(startScanSuccess, startScanError, {});
-}
-
-function startScanSuccess(result){
-    if(result.status == "scanStarted"){
-        // scanning
-        alert("Scanning for device...");
-    }
-    else if(result.status == "scanResult"){
-        connect(result.name, result.address);
-    }
-}
-
-var startScanError = function(error){
-    alert(error.message);
-}
-
-// stopScan 
-var stopScanSuccess = function(result){
-    alert(result.status);
-}
-
-var stopScanError = function(error){
-    alert(error.message);
-}
-
-// connect
-function connect(name, address){
-    alert("Connecting to " + name);
-    bluetoothle.stopScan(stopScanSuccess, stopScanError);
-    bluetoothle.connect(connectSuccess, connectError, {address: address} );
-}
-
-var connectSuccess = function(result){
-    alert("Connected to " + result.name + "// " + result.address);
-    if(result.status == "connected"){
-        bluetoothle.discover(discoverSuccess, discoverError, {address: result.address})
-    }
-}
-
-var connectError = function(error){
-    alert(error.message);
-}
-
-// enable
-var enableSuccess = function(){
-    startScan();
-}
-
-var enableError = function(error){
-    alert(error.message);
-}
-
-// discover
-var discoverSuccess = function(result){
-    // Discover success
-    alert("Discovery: " + result.services.uuid);
-}
-
-var discoverError = function(error){
-    alert(error.message);
 }
