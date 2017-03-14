@@ -43,17 +43,6 @@ function onDeviceReady(){
 
     // backgroundMode is enabled here
     // cordova.plugins.backgroundMode.enable();
-
-    // Create the beacon you want to look for
-
-    // createBeacon() 
-    var beaconRegion = new cordova.plugins.locationManager.BeaconRegion(
-        mintRegion.uuid,
-        mintRegion.identifier,
-        mintRegion.major,
-        mintRegion.minor
-    );
-
 }
 
 //
@@ -71,13 +60,14 @@ var initResult = function(result){
 }
 
 function createBeacon(uuid, identifier, major, minor){
+    alert("createBeacon");
     var mintRegion = new cordova.plugins.locationManager.BeaconRegion(uuid, identifier, major, minor);
+    alert(mintRegion);
     startMonitoring(mintRegion);
 }
 
 function startMonitoring(beaconRegion){
-
-    alert("Start monitoring");
+    alert("startMonitoring");
 
     // Create delegate object that holds beacon callback functions.
     var delegate = new cordova.plugins.locationManager.Delegate();
