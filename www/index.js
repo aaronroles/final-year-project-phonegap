@@ -4,7 +4,12 @@ document.addEventListener("deviceready", onDeviceReady, false);
 var updates = 0;
 var km = 0;
 
-var delegate;
+var mintRegion = {
+        uuid: "b9407f30-f5f8-466e-aff9-25556b57fe6d",
+        identifier: "mint",
+        major: 4906,
+        minor: 24494
+}
 
 function onDeviceReady(){
     alert("Device Ready");
@@ -44,17 +49,21 @@ function onDeviceReady(){
     // cordova.plugins.backgroundMode.enable();
 
     // Create the beacon you want to look for
-    var mintRegion = new cordova.plugins.locationManager.BeaconRegion(
-        "b9407f30-f5f8-466e-aff9-25556b57fe6d",
-        "mint",
-        4906,
-        24494
+    var beaconRegion = new cordova.plugins.locationManager.BeaconRegion(
+        mintRegion.uuid,
+        mintRegion.identifier,
+        mintRegion.major,
+        mintRegion.minor
     );
+
+    alert(mintRegion);
 
     startMonitoring();
 }
 
 function startMonitoring(){
+
+    alert("Start monitoring");
 
     function onDidDetermineStateForRegion(result){
 		alert("onDidDetermineStateForRegion: " + JSON.stringify(result));
@@ -65,7 +74,7 @@ function startMonitoring(){
     }
 
     function onError(errorMessage){
-        console.log('Monitoring beacons did fail: ' + errorMessage);
+        alert('Monitoring beacons did fail: ' + errorMessage);
     }
 
     // Request permission from user to access location info.
@@ -106,8 +115,8 @@ var onSuccess = function(position){
         'Speed in kilometres per hour: ' + km + ' km/h <br>' +
         'Speed in metres per second: ' + position.coords.speed + ' m/s';
 
-        // If speed greater than 0
-        if(position.coords.speed > 0){
+        // If speed greater than 10
+        if(km > 10){
             // lock the phone
             window.forceLock.lock(
                 function(){
