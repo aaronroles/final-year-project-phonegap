@@ -4,15 +4,11 @@ document.addEventListener("deviceready", onDeviceReady, false);
 var updates = 0;
 var km = 0;
 
-var mintRegion = {
-        uuid: "b9407f30-f5f8-466e-aff9-25556b57fe6d",
-        identifier: "mint",
-        major: 4906,
-        minor: 24494
-}
-
 function onDeviceReady(){
     alert("Device Ready");
+
+    // Initialise bluetoothle
+    bluetoothle.initialize(initResult, {"request": true, "statusReceiver": true});
 
     // Start watching location
     var watchPosition = navigator.geolocation.watchPosition(onSuccess, onError, {enableHighAccuracy: true});
@@ -49,6 +45,8 @@ function onDeviceReady(){
     // cordova.plugins.backgroundMode.enable();
 
     // Create the beacon you want to look for
+
+    // createBeacon() 
     var beaconRegion = new cordova.plugins.locationManager.BeaconRegion(
         mintRegion.uuid,
         mintRegion.identifier,
@@ -56,48 +54,52 @@ function onDeviceReady(){
         mintRegion.minor
     );
 
-    alert(mintRegion);
-
-    startMonitoring();
-}
-
-function startMonitoring(){
-
-    alert("Start monitoring");
-
-    function onDidDetermineStateForRegion(result){
-		alert("onDidDetermineStateForRegion: " + JSON.stringify(result));
-    }
-
-    function onDidStartMonitoringForRegion (result){
-        alert("onDidStartMonitoringForRegion: " + JSON.stringify(result));
-    }
-
-    function onError(errorMessage){
-        alert('Monitoring beacons did fail: ' + errorMessage);
-    }
-
-    // Request permission from user to access location info.
-    cordova.plugins.locationManager.requestAlwaysAuthorization();
-
-    // Create delegate object that holds beacon callback functions.
-    var delegate = new cordova.plugins.locationManager.Delegate();
-    cordova.plugins.locationManager.setDelegate(delegate);
-
-    // Set delegate functions.
-    delegate.didDetermineStateForRegion = onDidDetermineStateForRegion;
-    delegate.didStartMonitoringForRegion  = onDidStartMonitoringForRegion;
-
-    // Start monitoring for mint beacon 
-    cordova.plugins.locationManager.startMonitoringForRegion(mintRegion)
-        .fail(onError)
-        .done();
-
 }
 
 //
 // ! -- Look at running code for when backgroundMode is enabled ! --
 //
+
+var initResult = function(result){
+    if(result.status == "enabled"){
+        alert("initResult");
+        createBeacon("b9407f30-f5f8-466e-aff9-25556b57fe6d", "mint", 4906, 24494);
+    }
+    else{
+        alert("BLE Error");
+    }
+}
+
+function createBeacon(uuid, identifier, major, minor){
+    var mintRegion = new cordova.plugins.locationManager.BeaconRegion(uuid, identifier, major, minor);
+    startMonitoring(mintRegion);
+}
+
+function startMonitoring(beaconRegion){
+
+    alert("Start monitoring");
+
+    // Create delegate object that holds beacon callback functions.
+    var delegate = new cordova.plugins.locationManager.Delegate();
+
+    delegate.didDetermineStateForRegion = function(result){
+        alert("didDetermineStateForRegion" + JSON.stringify(result));
+    }
+
+    delegate.didStartMonitoringForRegion = function(result){
+        alert("didStartMonitoringForRegion" + JSON.stringify(result));
+    }
+
+    cordova.plugins.locationManager.setDelegate(delegate);
+
+    // Request permission from user to access location info.
+    cordova.plugins.locationManager.requestAlwaysAuthorization();
+
+    // Start monitoring for mint beacon 
+    cordova.plugins.locationManager.startMonitoringForRegion(beaconRegion)
+        .fail(function(e) { console.error(e); })
+        .done();
+}
 
 
 // When location is successfully retrieved
