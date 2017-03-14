@@ -40,6 +40,22 @@ module.exports = [
             "cordova.plugins.notification.local.core",
             "plugin.notification.local.core"
         ]
+    },
+    {
+        "file": "plugins/cordova-plugin-bluetoothle/www/bluetoothle.js",
+        "id": "cordova-plugin-bluetoothle.BluetoothLe",
+        "pluginId": "cordova-plugin-bluetoothle",
+        "clobbers": [
+            "window.bluetoothle"
+        ]
+    },
+    {
+        "file": "plugins/cordova-plugin-force-lock/www/forceLock.js",
+        "id": "cordova-plugin-force-lock.forceLock",
+        "pluginId": "cordova-plugin-force-lock",
+        "clobbers": [
+            "window.forceLock"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -48,7 +64,9 @@ module.exports.metadata =
     "cordova-plugin-device": "1.1.4",
     "cordova-plugin-app-event": "1.2.0",
     "de.appplant.cordova.plugin.local-notification": "0.8.4",
-    "cordova-plugin-geolocation": "2.1.0"
+    "cordova-plugin-geolocation": "2.1.0",
+    "cordova-plugin-bluetoothle": "4.3.0",
+    "cordova-plugin-force-lock": "0.0.1"
 }
 // BOTTOM OF METADATA
 });

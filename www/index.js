@@ -138,7 +138,7 @@ function connect(name, address){
 }
 
 var connectSuccess = function(result){
-    alert("Connected to device");
+    alert("Connected to " + result.name + "// " + result.address);
     if(result.status == "connected"){
         bluetoothle.discover(discoverSuccess, discoverError, {address: result.address})
     }
@@ -160,6 +160,7 @@ var enableError = function(error){
 // discover
 var discoverSuccess = function(result){
     // Discover success
+    alert("Discovery: " + result.services.uuid);
 }
 
 var discoverError = function(error){

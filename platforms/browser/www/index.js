@@ -2,19 +2,20 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 
 var updates = 0;
-var currentSpeed;
+var km = 0;
+var bleDevices = 0;
+var enabled = false;
+var scanning = false;
+var scanAllowed = true;
 
 function onDeviceReady(){
-    document.addEventListener("pause", onPause, false);
-    document.addEventListener("resume", onResume, false);
-    //alert("Device Ready");
+    alert("Device Ready");
 
-    if(cordova.plugins.backgroundMode.isEnabled()){
-        alert("bg mode true")
-    }
-    else{alert("false")};
-
+    // Start watching location
     var watchPosition = navigator.geolocation.watchPosition(onSuccess, onError, {enableHighAccuracy: true});
+
+    // Initialise bluetoothle
+    bluetoothle.initialize(initResult, {"request":true, "statusReceiver":true, "restoreKey": "bluetoothleplugin-central" });
 
     // If it has permissions
     cordova.plugins.notification.local.hasPermission(function(granted){
@@ -43,21 +44,18 @@ function onDeviceReady(){
             });
         }
     });
+
+    // backgroundMode is enabled here
+    //cordova.plugins.backgroundMode.enable();
 }
 
-function onPause(){
-    // When app is paused, enable background mode
-    cordova.plugins.backgroundMode.enable();
-}
-
-function onResume(){
-    // When app resumes, disable background mode
-    cordova.plugins.backgroundMode.disable();
-}
+//
+// ! -- Look at running code for when backgroundMode is enabled ! --
+//
 
 // When location is successfully retrieved
 var onSuccess = function(position){
-    var km = currentSpeed = position.coords.speed * 3.6;
+    km = position.coords.speed * 3.6;
     updates++;
 
     document.getElementById("info").innerHTML = 
@@ -65,15 +63,23 @@ var onSuccess = function(position){
         'Updates: '     + updates + '<br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
-        //'Accuracy: '    + position.coords.accuracy + '<br>' +
-        'Speed: '       + km + ' km/h';
+        'Speed in kilometres per hour: ' + km + ' km/h <br>' +
+        'Speed in metres per second: ' + position.coords.speed + 'm/s';
 
         if(position.coords.speed > 0){
-            alert("SLOW DOWN");
-            cordova.plugins.notification.local.schedule({
+            window.forceLock.lock(
+                function(){
+                    // success
+                    cordova.plugins.backgroundMode.enable();
+                    cordova.plugins.notification.local.schedule({
                         title: "Turn your phone off",
                         message: "You are driving"
-            });
+                    });
+                },
+                function(e){
+                    console.log("error", e);
+                }
+            )
         }
 }
 
@@ -82,12 +88,81 @@ var onError = function(position){
     alert("Error with your location services");
 }
 
-// When backgroundMode is active
-cordova.plugins.backgroundMode.onactivate = function () {
-    setTimeout(function () {
-        // Modify the currently displayed notification
-        cordova.plugins.backgroundMode.configure({
-            text:'Moving at ' + currentSpeed + ' km/h'
-        });
-    }, 5000);
+// When bluetoothle is initialised
+var initResult = function(result){
+    // If the user has enabled bluetooth
+    if(result.status == "enabled"){
+        // enabled 
+        alert("Bluetooth LE is enabled");
+        startScan();
+    }
+    else{
+        // Prompt the user to enable bluetooth
+        bluetoothle.enable(enableSuccess, enableError);
+    }
+}
+
+// startScan
+function startScan(){
+    bluetoothle.startScan(startScanSuccess, startScanError, {});
+}
+
+function startScanSuccess(result){
+    if(result.status == "scanStarted"){
+        // scanning
+        alert("Scanning for device...");
+    }
+    else if(result.status == "scanResult"){
+        connect(result.name, result.address);
+    }
+}
+
+var startScanError = function(error){
+    alert(error.message);
+}
+
+// stopScan 
+var stopScanSuccess = function(result){
+    alert(result.status);
+}
+
+var stopScanError = function(error){
+    alert(error.message);
+}
+
+// connect
+function connect(name, address){
+    alert("Connecting to " + name);
+    bluetoothle.stopScan(stopScanSuccess, stopScanError);
+    bluetoothle.connect(connectSuccess, connectError, {address: address} );
+}
+
+var connectSuccess = function(result){
+    alert("Connected to " + result.name + "// " + result.address);
+    if(result.status == "connected"){
+        bluetoothle.discover(discoverSuccess, discoverError, {address: result.address})
+    }
+}
+
+var connectError = function(error){
+    alert(error.message);
+}
+
+// enable
+var enableSuccess = function(){
+    startScan();
+}
+
+var enableError = function(error){
+    alert(error.message);
+}
+
+// discover
+var discoverSuccess = function(result){
+    // Discover success
+    alert("Discovery: " + result.services.uuid);
+}
+
+var discoverError = function(error){
+    alert(error.message);
 }
