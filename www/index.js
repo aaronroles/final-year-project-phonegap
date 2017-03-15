@@ -52,33 +52,40 @@ function onDeviceReady(){
 var initResult = function(result){
     if(result.status == "enabled"){
         alert("initResult");
-        createBeacon("b9407f30-f5f8-466e-aff9-25556b57fe6d", "mint", 4906, 24494);
+        createBeaconAndMonitor("mint", "b9407f30-f5f8-466e-aff9-25556b57fe6d", 4906, 24494);
     }
     else{
         alert("BLE Error");
     }
 }
 
-function createBeacon(uuid, identifier, major, minor){
+function createBeaconAndMonitor(identifier, uuid, major, minor){
     alert("createBeacon");
-    var mintRegion = new cordova.plugins.locationManager.BeaconRegion(uuid, identifier, major, minor);
-    alert(mintRegion);
-    startMonitoring(mintRegion);
-}
-
-function startMonitoring(beaconRegion){
-    alert("startMonitoring");
 
     // Create delegate object that holds beacon callback functions.
     var delegate = new cordova.plugins.locationManager.Delegate();
 
+    // didStartMonitoringForRegion - when the device actively
+    // starts looking for the beacon region 
+    delegate.didStartMonitoringForRegion = function(result){
+        // alert("didStartMonitoringForRegion" + JSON.stringify(result));
+        document.getElementById("log").innerText = "Searching for beacon";
+    }
+    
+    // didDetermineStateForRegion - when the device has entered  
+    // or exited the beacon region 
     delegate.didDetermineStateForRegion = function(result){
-        alert("didDetermineStateForRegion" + JSON.stringify(result));
+        // alert("didDetermineStateForRegion" + JSON.stringify(result));
+
+        if(result.state == "CLRegionStateInside"){
+            document.getElementById("log").innerText = "In beacon's region";
+        }
+        else if(result.state == "CLRegionStateOutside"){
+            document.getElementById("log").innerText = "Left beacon's region";
+        }
     }
 
-    delegate.didStartMonitoringForRegion = function(result){
-        alert("didStartMonitoringForRegion" + JSON.stringify(result));
-    }
+    var mintRegion = new cordova.plugins.locationManager.BeaconRegion(identifier, uuid, major, minor);
 
     cordova.plugins.locationManager.setDelegate(delegate);
 
@@ -86,11 +93,10 @@ function startMonitoring(beaconRegion){
     cordova.plugins.locationManager.requestAlwaysAuthorization();
 
     // Start monitoring for mint beacon 
-    cordova.plugins.locationManager.startMonitoringForRegion(beaconRegion)
+    cordova.plugins.locationManager.startMonitoringForRegion(mintRegion)
         .fail(function(e) { console.error(e); })
         .done();
 }
-
 
 // When location is successfully retrieved
 var onSuccess = function(position){
@@ -104,8 +110,8 @@ var onSuccess = function(position){
         'Updates: '     + updates + '<br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
-        'Speed in kilometres per hour: ' + km + ' km/h <br>' +
-        'Speed in metres per second: ' + position.coords.speed + ' m/s';
+        'Speed in kilometres per hour: ' + km + ' km/h <br>';
+        // + 'Speed in metres per second: ' + position.coords.speed + ' m/s';
 
         // If speed greater than 10
         if(km > 10){
@@ -129,6 +135,6 @@ var onSuccess = function(position){
 }
 
 // When there is an error with location 
-var onError = function(position){
-    alert("Error with your location services");
+var onError = function(error){
+    document.getElementById("log").innerText = error.message;
 }
