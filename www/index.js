@@ -3,15 +3,13 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 var updates = 0;
 var km = 0;
+var watchingPosition = false;
 
 function onDeviceReady(){
-    alert("Device Ready");
+    // alert("Device Ready");
 
     // Initialise bluetoothle
     bluetoothle.initialize(initResult, {"request": true, "statusReceiver": true});
-
-    // Start watching location
-    var watchPosition = navigator.geolocation.watchPosition(onSuccess, onError, {enableHighAccuracy: true});
 
     // If it has permissions
     cordova.plugins.notification.local.hasPermission(function(granted){
@@ -51,16 +49,16 @@ function onDeviceReady(){
 
 var initResult = function(result){
     if(result.status == "enabled"){
-        alert("initResult");
+        // alert("initResult");
         createBeaconAndMonitor("mint", "b9407f30-f5f8-466e-aff9-25556b57fe6d", 4906, 24494);
     }
     else{
-        alert("BLE Error");
+        // alert("BLE Error");
     }
 }
 
 function createBeaconAndMonitor(identifier, uuid, major, minor){
-    alert("createBeacon");
+    // alert("createBeacon");
 
     // Create delegate object that holds beacon callback functions.
     var delegate = new cordova.plugins.locationManager.Delegate();
@@ -77,11 +75,28 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
     delegate.didDetermineStateForRegion = function(result){
         // alert("didDetermineStateForRegion" + JSON.stringify(result));
 
+        // If inside/entered beacon region 
         if(result.state == "CLRegionStateInside"){
             document.getElementById("log").innerText = "In beacon's region";
+            // watchingPosition false by default
+            // so if not watchingPosition
+            if(!watchingPosition){
+                // watchingPosition to true
+                watchingPosition = true;
+                // Start watching location
+                var watchPosition = navigator.geolocation.watchPosition(onSuccess, onError, {enableHighAccuracy: true});
+            }
         }
+        // Else if outside/exited beacon region
         else if(result.state == "CLRegionStateOutside"){
             document.getElementById("log").innerText = "Left beacon's region";
+            // If you are watchingPosition
+            if(watchingPosition){
+                // watchingPosition to false
+                watchingPosition = false;
+                // Stop watching location 
+                navigator.geolocation.clearWatch(watchPosition);
+            }
         }
     }
 
