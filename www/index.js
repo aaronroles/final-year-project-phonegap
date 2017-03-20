@@ -39,13 +39,9 @@ function onDeviceReady(){
         }
     });
 
-    // backgroundMode is enabled here
-    // cordova.plugins.backgroundMode.enable();
+    // Enable backgroundMode
+    cordova.plugins.backgroundMode.enable();
 }
-
-//
-// ! -- Look at running code for when backgroundMode is enabled ! --
-//
 
 var initResult = function(result){
     if(result.status == "enabled"){
@@ -86,6 +82,11 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
                 // Start watching location
                 var watchPosition = navigator.geolocation.watchPosition(onSuccess, onError, {enableHighAccuracy: true});
             }
+
+            cordova.plugins.notification.local.schedule({
+                        title: "Near vehicle",
+                        message: "Make sure this app is open"
+                    });
         }
         // Else if outside/exited beacon region
         else if(result.state == "CLRegionStateOutside"){
@@ -97,6 +98,10 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
                 // Stop watching location 
                 navigator.geolocation.clearWatch(watchPosition);
             }
+            cordova.plugins.notification.local.schedule({
+                        title: "Moving away from vehicle",
+                        message: "Remember to open the app next time"
+                    });
         }
     }
 
@@ -115,6 +120,7 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
 
 // When location is successfully retrieved
 var onSuccess = function(position){
+    //alert("location success");
     // To get km/s multiply m/s by 3.6
     km = position.coords.speed * 3.6;
     // Increment update 
@@ -125,25 +131,24 @@ var onSuccess = function(position){
         'Updates: '     + updates + '<br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
-        'Speed in kilometres per hour: ' + km + ' km/h <br>';
-        // + 'Speed in metres per second: ' + position.coords.speed + ' m/s';
+        'Speed in kilometres per hour: ' + km + ' km/h <br>'
+        + 'Speed in metres per second: ' + position.coords.speed + ' m/s';
 
         // If speed greater than 10
-        if(km > 10){
+        if(km > 10 || position.coords.speed > 0.1){
             // lock the phone
             window.forceLock.lock(
                 function(){
                     // success
-                    // Enable backgroundMode
-                    // cordova.plugins.backgroundMode.enable();
                     // Send notification
                     cordova.plugins.notification.local.schedule({
                         title: "Turn your phone off",
                         message: "You are driving"
                     });
+                    cordova.plugins.backgroundMode.moveToBackground();
                 },
                 function(e){
-                    console.log("error", e);
+                    alert("error: " + e);
                 }
             )
         }
@@ -153,3 +158,12 @@ var onSuccess = function(position){
 var onError = function(error){
     document.getElementById("log").innerText = error.message;
 }
+
+cordova.plugins.backgroundMode.on('activate', function () {
+    setInterval(function () {
+         cordova.plugins.backgroundMode.configure({
+            title: "backgroundMode",
+            text: "enabled"
+        });
+    }, 1000);
+});
