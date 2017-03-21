@@ -3,10 +3,21 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 var updates = 0;
 var km = 0;
+var ms = 0;
 var watchingPosition = false;
 
 function onDeviceReady(){
     // alert("Device Ready");
+
+    cordova.plugins.notification.local.schedule({
+        title: "Reminder",
+        text: 'My notification',
+        firstAt: today_at_20_30_pm,
+        every: 'day',
+        data: { key:'value' }
+    })
+
+    document.addEventListener("pause", onAppPause, false);
 
     // Initialise bluetoothle
     bluetoothle.initialize(initResult, {"request": true, "statusReceiver": true});
@@ -38,9 +49,13 @@ function onDeviceReady(){
             });
         }
     });
+}
 
-    // Enable backgroundMode
-    cordova.plugins.backgroundMode.enable();
+function onAppPause(){
+    cordova.plugins.notification.local.schedule({
+        title: "Paused in background",
+        message: "Aaron's app paused"
+    });
 }
 
 var initResult = function(result){
@@ -84,9 +99,9 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
             }
 
             cordova.plugins.notification.local.schedule({
-                        title: "Near vehicle",
-                        message: "Make sure this app is open"
-                    });
+                title: "Near vehicle",
+                message: "Make sure this app is open"
+            });
         }
         // Else if outside/exited beacon region
         else if(result.state == "CLRegionStateOutside"){
@@ -99,9 +114,9 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
                 navigator.geolocation.clearWatch(watchPosition);
             }
             cordova.plugins.notification.local.schedule({
-                        title: "Moving away from vehicle",
-                        message: "Remember to open the app next time"
-                    });
+                title: "Moving away from vehicle",
+                message: "Remember to open the app next time"
+            });
         }
     }
 
@@ -123,6 +138,7 @@ var onSuccess = function(position){
     //alert("location success");
     // To get km/s multiply m/s by 3.6
     km = position.coords.speed * 3.6;
+    ms = position.coords.speed;
     // Increment update 
     updates++;
     // Update text
@@ -132,25 +148,22 @@ var onSuccess = function(position){
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
         'Speed in kilometres per hour: ' + km + ' km/h <br>'
-        + 'Speed in metres per second: ' + position.coords.speed + ' m/s';
+        + 'Speed in metres per second: ' + ms + ' m/s';
 
         // If speed greater than 10
-        if(km > 10 || position.coords.speed > 0.1){
+        if(km > 10 || ms > 0){
             // lock the phone
-            window.forceLock.lock(
-                function(){
-                    // success
-                    // Send notification
-                    cordova.plugins.notification.local.schedule({
-                        title: "Turn your phone off",
-                        message: "You are driving"
-                    });
-                    cordova.plugins.backgroundMode.moveToBackground();
-                },
-                function(e){
-                    alert("error: " + e);
-                }
-            )
+            window.forceLock.lock(function(){
+                // success
+                // Send notification
+                cordova.plugins.notification.local.schedule({
+                    title: "Turn your phone off",
+                    message: "You are driving"
+                });
+            },
+            function(e){
+                alert("error: " + e);
+            })
         }
 }
 
@@ -158,12 +171,3 @@ var onSuccess = function(position){
 var onError = function(error){
     document.getElementById("log").innerText = error.message;
 }
-
-cordova.plugins.backgroundMode.on('activate', function () {
-    setInterval(function () {
-         cordova.plugins.backgroundMode.configure({
-            title: "backgroundMode",
-            text: "enabled"
-        });
-    }, 1000);
-});
