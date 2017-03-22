@@ -1,93 +1,85 @@
 
+// Add event listener to handle when the device is ready to go
 document.addEventListener("deviceready", onDeviceReady, false);
 
 var updates = 0;
 var km = 0;
-var ms = 0;
+var m = 0;
 var watchingPosition = false;
 
+// This function is called when device is ready
 function onDeviceReady(){
-    // alert("Device Ready");
 
-    cordova.plugins.notification.local.schedule({
-        title: "Reminder",
-        text: 'My notification',
-        firstAt: today_at_20_30_pm,
-        every: 'day',
-        data: { key:'value' }
-    })
-
+    // Add pause event listener for when app is in background 
     document.addEventListener("pause", onAppPause, false);
 
-    // Initialise bluetoothle
+    // Initialise bluetooth via bluetoothle plugin 
     bluetoothle.initialize(initResult, {"request": true, "statusReceiver": true});
 
     // If it has permissions
     cordova.plugins.notification.local.hasPermission(function(granted){
         // If it is allowed
         if(granted == true){
-            // Schedule notification
-            cordova.plugins.notification.local.schedule({
-                title: "Thanks for opening the app",
-                message: "If you see this, it works"
-            }); 
+            // We are allowed to send notifications 
+            break;
         }
         else{
             // Otherwise register the permission
             cordova.plugins.notification.local.registerPermission(function(granted){
                 // If it is then allowed
                 if(granted == true){
-                    // Schedule notification
-                    cordova.plugins.notification.local.schedule({
-                        title: "Thanks for opening the app",
-                        message: "If you see this, it works"
-                    });
+                    // We are now allowed to send notifications
+                    break;
                 }
+                // If it is still not allowed 
                 else{
-                    alert("Notifications not allowed");
+                    document.getElementById("log").innerText = "Notifications are not allowed";
                 }
             });
         }
     });
 }
 
+// This function is called when the app is put to background or minimised
 function onAppPause(){
+    // Send local notification informing user app is paused 
     cordova.plugins.notification.local.schedule({
         title: "Paused in background",
         message: "Aaron's app paused"
     });
 }
 
+// initResult is called once Bluetooth is initialised
 var initResult = function(result){
+    // If Bluetooth was successfully enabled
     if(result.status == "enabled"){
-        // alert("initResult");
+        // Run this function which contains four parameters
+        // These parameters define what Bluetooth beacon to monitor 
         createBeaconAndMonitor("mint", "b9407f30-f5f8-466e-aff9-25556b57fe6d", 4906, 24494);
     }
     else{
-        // alert("BLE Error");
+        // Otherwise we have a problem with Bluetooth
+        alert("Bluetooth error");
     }
 }
 
+// Called after Bluetooth being enabled to start monitoring for beacons
 function createBeaconAndMonitor(identifier, uuid, major, minor){
-    // alert("createBeacon");
-
     // Create delegate object that holds beacon callback functions.
     var delegate = new cordova.plugins.locationManager.Delegate();
 
-    // didStartMonitoringForRegion - when the device actively
-    // starts looking for the beacon region 
+    // When the device actively starts looking for the beacon region 
     delegate.didStartMonitoringForRegion = function(result){
-        // alert("didStartMonitoringForRegion" + JSON.stringify(result));
-        document.getElementById("log").innerText = "Searching for beacon";
+        document.getElementById("log").innerText = "Searching for beacon. . .";
     }
     
-    // didDetermineStateForRegion - when the device has entered  
-    // or exited the beacon region 
+    // When the device has entered or exited the beacon region 
     delegate.didDetermineStateForRegion = function(result){
-        // alert("didDetermineStateForRegion" + JSON.stringify(result));
-
         // If inside/entered beacon region 
         if(result.state == "CLRegionStateInside"){
+            // This is done so watching location is only done when near 
+            // the Bluetooth beacon, which would be placed inside a vehicle. 
+            // It doesn't make sense to do it anywhere else. 
             document.getElementById("log").innerText = "In beacon's region";
             // watchingPosition false by default
             // so if not watchingPosition
@@ -97,7 +89,7 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
                 // Start watching location
                 var watchPosition = navigator.geolocation.watchPosition(onSuccess, onError, {enableHighAccuracy: true});
             }
-
+            // Send a local notification informing user you are near the vehicle 
             cordova.plugins.notification.local.schedule({
                 title: "Near vehicle",
                 message: "Make sure this app is open"
@@ -105,6 +97,9 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
         }
         // Else if outside/exited beacon region
         else if(result.state == "CLRegionStateOutside"){
+            // This only works once you initially enter a beacon region 
+            // then leave it. Once you leave the region there is no need
+            // to monitor the user's location. 
             document.getElementById("log").innerText = "Left beacon's region";
             // If you are watchingPosition
             if(watchingPosition){
@@ -113,6 +108,7 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
                 // Stop watching location 
                 navigator.geolocation.clearWatch(watchPosition);
             }
+            // Send a local notification informing user that they have moved away 
             cordova.plugins.notification.local.schedule({
                 title: "Moving away from vehicle",
                 message: "Remember to open the app next time"
@@ -120,8 +116,11 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
         }
     }
 
+    // Storing the passed parameters as a beacon region object
+    // This is the beacon we want to listen out for 
     var mintRegion = new cordova.plugins.locationManager.BeaconRegion(identifier, uuid, major, minor);
 
+    // Set the delegate object we want to use for beacon callbacks 
     cordova.plugins.locationManager.setDelegate(delegate);
 
     // Request permission from user to access location info.
@@ -129,16 +128,14 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
 
     // Start monitoring for mint beacon 
     cordova.plugins.locationManager.startMonitoringForRegion(mintRegion)
-        .fail(function(e) { console.error(e); })
+        .fail(function(e) { alert(e); })
         .done();
 }
 
 // When location is successfully retrieved
 var onSuccess = function(position){
-    //alert("location success");
-    // To get km/s multiply m/s by 3.6
+    // Multiply m/s by 3.6 to get km/h 
     km = position.coords.speed * 3.6;
-    ms = position.coords.speed;
     // Increment update 
     updates++;
     // Update text
@@ -147,23 +144,24 @@ var onSuccess = function(position){
         'Updates: '     + updates + '<br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
-        'Speed in kilometres per hour: ' + km + ' km/h <br>'
-        + 'Speed in metres per second: ' + ms + ' m/s';
+        'Speed in kilometres per hour: ' + km + ' km/h <br>';
 
         // If speed greater than 10
-        if(km > 10 || ms > 0){
-            // lock the phone
-            window.forceLock.lock(function(){
-                // success
-                // Send notification
-                cordova.plugins.notification.local.schedule({
-                    title: "Turn your phone off",
-                    message: "You are driving"
-                });
-            },
-            function(e){
-                alert("error: " + e);
-            })
+        if(km > 10){
+            // Lock the phone
+            window.forceLock.lock(
+                function(){
+                    // success
+                    // Send notification
+                    cordova.plugins.notification.local.schedule({
+                        title: "Warning!",
+                        message: "Do not use your phone while driving"
+                    });
+                },
+                function(e){
+                    // error 
+                    alert("error: " + e);
+                })
         }
 }
 
