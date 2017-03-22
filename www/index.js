@@ -4,7 +4,6 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 var updates = 0;
 var km = 0;
-var m = 0;
 var watchingPosition = false;
 
 // This function is called when device is ready
