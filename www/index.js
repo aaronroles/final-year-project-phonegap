@@ -20,7 +20,6 @@ function onDeviceReady(){
         // If it is allowed
         if(granted == true){
             // We are allowed to send notifications 
-            break;
         }
         else{
             // Otherwise register the permission
@@ -28,7 +27,6 @@ function onDeviceReady(){
                 // If it is then allowed
                 if(granted == true){
                     // We are now allowed to send notifications
-                    break;
                 }
                 // If it is still not allowed 
                 else{
