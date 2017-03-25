@@ -7,6 +7,10 @@
     <author email="aaron_roles93@hotmail.com" href="http://about.me/aroles">
         Aaron Roles
     </author>
+
+    <preference name="orientation" value="portrait" />
+    <preference name="fullscreen" value="true" />
+
     <content src="index.html" />
     <access origin="*" />
 

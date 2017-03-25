@@ -1,168 +1,168 @@
 
+// Add event listener to handle when the device is ready to go
 document.addEventListener("deviceready", onDeviceReady, false);
 
 var updates = 0;
 var km = 0;
-var bleDevices = 0;
-var enabled = false;
-var scanning = false;
-var scanAllowed = true;
+var watchingPosition = false;
 
+// This function is called when device is ready
 function onDeviceReady(){
-    alert("Device Ready");
 
-    // Start watching location
-    var watchPosition = navigator.geolocation.watchPosition(onSuccess, onError, {enableHighAccuracy: true});
+    // Add pause event listener for when app is in background 
+    document.addEventListener("pause", onAppPause, false);
 
-    // Initialise bluetoothle
-    bluetoothle.initialize(initResult, {"request":true, "statusReceiver":true, "restoreKey": "bluetoothleplugin-central" });
+    // Initialise bluetooth via bluetoothle plugin 
+    bluetoothle.initialize(initResult, {"request": true, "statusReceiver": true});
 
     // If it has permissions
     cordova.plugins.notification.local.hasPermission(function(granted){
         // If it is allowed
         if(granted == true){
-            // Schedule notification
-            cordova.plugins.notification.local.schedule({
-                title: "Thanks for opening the app",
-                message: "If you see this, it works"
-            }); 
+            // We are allowed to send notifications 
         }
         else{
             // Otherwise register the permission
             cordova.plugins.notification.local.registerPermission(function(granted){
                 // If it is then allowed
                 if(granted == true){
-                    // Schedule notification
-                    cordova.plugins.notification.local.schedule({
-                        title: "Thanks for opening the app",
-                        message: "If you see this, it works"
-                    });
+                    // We are now allowed to send notifications
                 }
+                // If it is still not allowed 
                 else{
-                    alert("Notifications not allowed");
+                    document.getElementById("log").innerText = "Notifications are not allowed";
                 }
             });
         }
     });
-
-    // backgroundMode is enabled here
-    //cordova.plugins.backgroundMode.enable();
 }
 
-//
-// ! -- Look at running code for when backgroundMode is enabled ! --
-//
+// This function is called when the app is put to background or minimised
+function onAppPause(){
+    // Send local notification informing user app is paused 
+    cordova.plugins.notification.local.schedule({
+        title: "Paused in background",
+        message: "Aaron's app paused"
+    });
+}
+
+// initResult is called once Bluetooth is initialised
+var initResult = function(result){
+    // If Bluetooth was successfully enabled
+    if(result.status == "enabled"){
+        // Run this function which contains four parameters
+        // These parameters define what Bluetooth beacon to monitor 
+        createBeaconAndMonitor("mint", "b9407f30-f5f8-466e-aff9-25556b57fe6d", 4906, 24494);
+    }
+    else{
+        // Otherwise we have a problem with Bluetooth
+        alert("Bluetooth error");
+    }
+}
+
+// Called after Bluetooth being enabled to start monitoring for beacons
+function createBeaconAndMonitor(identifier, uuid, major, minor){
+    // Create delegate object that holds beacon callback functions.
+    var delegate = new cordova.plugins.locationManager.Delegate();
+
+    // When the device actively starts looking for the beacon region 
+    delegate.didStartMonitoringForRegion = function(result){
+        document.getElementById("log").innerText = "Searching for beacon. . .";
+    }
+    
+    // When the device has entered or exited the beacon region 
+    delegate.didDetermineStateForRegion = function(result){
+        // If inside/entered beacon region 
+        if(result.state == "CLRegionStateInside"){
+            // This is done so watching location is only done when near 
+            // the Bluetooth beacon, which would be placed inside a vehicle. 
+            // It doesn't make sense to do it anywhere else. 
+            document.getElementById("log").innerText = "In beacon's region";
+            // watchingPosition false by default
+            // so if not watchingPosition
+            if(!watchingPosition){
+                // watchingPosition to true
+                watchingPosition = true;
+                // Start watching location
+                var watchPosition = navigator.geolocation.watchPosition(onSuccess, onError, {enableHighAccuracy: true});
+            }
+            // Send a local notification informing user you are near the vehicle 
+            cordova.plugins.notification.local.schedule({
+                title: "Near vehicle",
+                message: "Make sure this app is open"
+            });
+        }
+        // Else if outside/exited beacon region
+        else if(result.state == "CLRegionStateOutside"){
+            // This only works once you initially enter a beacon region 
+            // then leave it. Once you leave the region there is no need
+            // to monitor the user's location. 
+            document.getElementById("log").innerText = "Left beacon's region";
+            // If you are watchingPosition
+            if(watchingPosition){
+                // watchingPosition to false
+                watchingPosition = false;
+                // Stop watching location 
+                navigator.geolocation.clearWatch(watchPosition);
+            }
+            // Send a local notification informing user that they have moved away 
+            cordova.plugins.notification.local.schedule({
+                title: "Moving away from vehicle",
+                message: "Remember to open the app next time"
+            });
+        }
+    }
+
+    // Storing the passed parameters as a beacon region object
+    // This is the beacon we want to listen out for 
+    var mintRegion = new cordova.plugins.locationManager.BeaconRegion(identifier, uuid, major, minor);
+
+    // Set the delegate object we want to use for beacon callbacks 
+    cordova.plugins.locationManager.setDelegate(delegate);
+
+    // Request permission from user to access location info.
+    cordova.plugins.locationManager.requestAlwaysAuthorization();
+
+    // Start monitoring for mint beacon 
+    cordova.plugins.locationManager.startMonitoringForRegion(mintRegion)
+        .fail(function(e) { alert(e); })
+        .done();
+}
 
 // When location is successfully retrieved
 var onSuccess = function(position){
+    // Multiply m/s by 3.6 to get km/h 
     km = position.coords.speed * 3.6;
+    // Increment update 
     updates++;
-
+    // Update text
     document.getElementById("info").innerHTML = 
         '<h2>Location Data</h2>' +
         'Updates: '     + updates + '<br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
-        'Speed in kilometres per hour: ' + km + ' km/h <br>' +
-        'Speed in metres per second: ' + position.coords.speed + 'm/s';
+        'Speed in kilometres per hour: ' + km + ' km/h <br>';
 
-        if(position.coords.speed > 0){
+        // If speed greater than 10
+        if(km > 10){
+            // Lock the phone
             window.forceLock.lock(
                 function(){
                     // success
-                    cordova.plugins.backgroundMode.enable();
+                    // Send notification
                     cordova.plugins.notification.local.schedule({
-                        title: "Turn your phone off",
-                        message: "You are driving"
+                        title: "Warning!",
+                        message: "Do not use your phone while driving"
                     });
                 },
                 function(e){
-                    console.log("error", e);
-                }
-            )
+                    // error 
+                    alert("error: " + e);
+                })
         }
 }
 
 // When there is an error with location 
-var onError = function(position){
-    alert("Error with your location services");
-}
-
-// When bluetoothle is initialised
-var initResult = function(result){
-    // If the user has enabled bluetooth
-    if(result.status == "enabled"){
-        // enabled 
-        alert("Bluetooth LE is enabled");
-        startScan();
-    }
-    else{
-        // Prompt the user to enable bluetooth
-        bluetoothle.enable(enableSuccess, enableError);
-    }
-}
-
-// startScan
-function startScan(){
-    bluetoothle.startScan(startScanSuccess, startScanError, {});
-}
-
-function startScanSuccess(result){
-    if(result.status == "scanStarted"){
-        // scanning
-        alert("Scanning for device...");
-    }
-    else if(result.status == "scanResult"){
-        connect(result.name, result.address);
-    }
-}
-
-var startScanError = function(error){
-    alert(error.message);
-}
-
-// stopScan 
-var stopScanSuccess = function(result){
-    alert(result.status);
-}
-
-var stopScanError = function(error){
-    alert(error.message);
-}
-
-// connect
-function connect(name, address){
-    alert("Connecting to " + name);
-    bluetoothle.stopScan(stopScanSuccess, stopScanError);
-    bluetoothle.connect(connectSuccess, connectError, {address: address} );
-}
-
-var connectSuccess = function(result){
-    alert("Connected to " + result.name + "// " + result.address);
-    if(result.status == "connected"){
-        bluetoothle.discover(discoverSuccess, discoverError, {address: result.address})
-    }
-}
-
-var connectError = function(error){
-    alert(error.message);
-}
-
-// enable
-var enableSuccess = function(){
-    startScan();
-}
-
-var enableError = function(error){
-    alert(error.message);
-}
-
-// discover
-var discoverSuccess = function(result){
-    // Discover success
-    alert("Discovery: " + result.services.uuid);
-}
-
-var discoverError = function(error){
-    alert(error.message);
+var onError = function(error){
+    document.getElementById("log").innerText = error.message;
 }

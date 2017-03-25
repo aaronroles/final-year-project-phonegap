@@ -190,5 +190,13 @@
         },
         "is_top_level": true,
         "variables": {}
+    },
+    "com.unarin.cordova.beacon": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-ibeacon@3.4.0"
+        },
+        "is_top_level": true,
+        "variables": {}
     }
 }

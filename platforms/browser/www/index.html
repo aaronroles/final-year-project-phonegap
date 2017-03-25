@@ -2,14 +2,21 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+        <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+        <link type="text/css" rel="stylesheet" href="css/styles.css"/>
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-        <title>Speed Notifications</title>
+        <title>Aaron's App</title>
     </head>
-    <body>
-        <h1>Notifications</h1>
-        <div id="info"></div>
-        <div id="ble"></div>
+    <body class="container blue lighten-1">
+        <div>
+            <div class="card-panel blue lighten-5 center-align" id="info">Sample text 1</div>
+            <div class="card medium blue lighten-5 center-align" id="mainContent">Sample text 3</div>
+            <div class="card-panel blue lighten-5 center-align" id="log">Sample text 2</div>
+        </div>
         <script type="text/javascript" src="index.js"></script>
         <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script type="text/javascript" src="js/materialize.min.js"></script>
     </body>
 </html>
