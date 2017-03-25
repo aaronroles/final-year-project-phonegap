@@ -67,7 +67,9 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
 
     // When the device actively starts looking for the beacon region 
     delegate.didStartMonitoringForRegion = function(result){
-        document.getElementById("log").innerText = "Searching for beacon. . .";
+        document.getElementById("log").innerText = 
+        "Searching for beacon... " + 
+        "<i class='small material-icons'>bluetooth_searching</i>";
     }
     
     // When the device has entered or exited the beacon region 
@@ -77,7 +79,9 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
             // This is done so watching location is only done when near 
             // the Bluetooth beacon, which would be placed inside a vehicle. 
             // It doesn't make sense to do it anywhere else. 
-            document.getElementById("log").innerText = "In beacon's region";
+            document.getElementById("log").innerText = 
+            "In beacon's region" + 
+            "<i class='small material-icons'>bluetooth_connected</i>";
             // watchingPosition false by default
             // so if not watchingPosition
             if(!watchingPosition){
@@ -97,7 +101,8 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
             // This only works once you initially enter a beacon region 
             // then leave it. Once you leave the region there is no need
             // to monitor the user's location. 
-            document.getElementById("log").innerText = "Left beacon's region";
+            document.getElementById("log").innerText = "Left beacon's region"
+            + "<i class='small material-icons'>bluetooth_searching</i>";
             // If you are watchingPosition
             if(watchingPosition){
                 // watchingPosition to false
@@ -137,11 +142,12 @@ var onSuccess = function(position){
     updates++;
     // Update text
     document.getElementById("info").innerHTML = 
-        '<h2>Location Data</h2>' +
-        'Updates: '     + updates + '<br>' +
+        'Update '     + updates;
+    document.getElementById("mainContent").innerHTML = 
+        '<i class="small material-icons">location_searching</i> Geolocation <br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
-        'Speed in kilometres per hour: ' + km + ' km/h <br>';
+        'Speed: ' + km + ' km/h <br>';
 
         // If speed greater than 10
         if(km > 10){
