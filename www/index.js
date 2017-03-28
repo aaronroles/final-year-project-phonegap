@@ -71,17 +71,18 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
     // Create delegate object that holds beacon callback functions.
     var delegate = new cordova.plugins.locationManager.Delegate();
 
-    // When the device actively starts looking for the beacon region 
-    delegate.didStartMonitoringForRegion = function(result){
-        document.getElementById("bluetoothState").innerHTML = 
-        'Searching for beacon... ';
-        // Update colour
+    // Update colour
         $("body").removeClass("red").addClass("orange lighten-1");
         $("#bluetoothState").removeClass("red").addClass("orange lighten-5");
         $("#mainContent").removeClass("red hide").addClass("orange lighten-5");
         $("#latLon").removeClass("red hide").addClass("orange lighten-4");
         $("#gauge").removeClass("red hide").addClass("orange lighten-4");
         $("#info").removeClass("red hide").addClass("orange lighten-5");
+
+    // When the device actively starts looking for the beacon region 
+    delegate.didStartMonitoringForRegion = function(result){
+        document.getElementById("bluetoothState").innerHTML = 
+        'Searching for beacon... ';
     }
     
     // When the device has entered or exited the beacon region 
