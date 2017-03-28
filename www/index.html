@@ -5,16 +5,17 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
         <link type="text/css" rel="stylesheet" href="css/styles.css"/>
-        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
         <title>Aaron's App</title>
     </head>
-    <body class="container blue lighten-1 material-icons">
+    <body class="container grey">
         <div>
-            <div class="card-panel blue lighten-5 center-align flow-text" id="info">Update 0</div>
-            <div class="card medium blue lighten-5 center-align flow-text" id="mainContent">Geolocation</div>
-            <div class="card-panel blue lighten-5 center-align flow-text" id="log">
-                Waiting for bluetooth to be enabled...
+            <div class="card-panel grey lighten-5 center-align flow-text" id="log">Waiting for bluetooth to be enabled...</div>
+            <div class="card medium grey lighten-5 center-align flow-text" id="mainContent">
+                <div class="card-panel grey lighten-4 center-align flow-text" id="latLon">Speedometer</div>
+                <div class="card small grey lighten-4 center-align flow-text" id="gauge">Gauge</div>
             </div>
+            <div class="card-panel grey lighten-5 center-align flow-text" id="info">Update 0</div>
         </div>
         <script type="text/javascript" src="index.js"></script>
         <script type="text/javascript" src="cordova.js"></script>

@@ -9,6 +9,17 @@ var watchingPosition = false;
 // This function is called when device is ready
 function onDeviceReady(){
 
+    // Make the body red
+    $("body").removeClass("grey").addClass("red lighten-1");
+    $("#log").removeClass("grey").addClass("red lighten-5");
+    $("#mainContent").removeClass("grey").addClass("red lighten-5").hide();
+    $("#latLon").removeClass("grey").addClass("red lighten-4");
+    $("#gauge").removeClass("grey").addClass("red lighten-4");
+    $("#info").removeClass("grey").addClass("red lighten-5").hide();
+
+    // Build speed gauge
+    buildGauge();
+
     // Add pause event listener for when app is in background 
     document.addEventListener("pause", onAppPause, false);
 
@@ -35,6 +46,9 @@ function onDeviceReady(){
             });
         }
     });
+}
+
+function buildGauge(){
 }
 
 // This function is called when the app is put to background or minimised
@@ -69,6 +83,13 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
     delegate.didStartMonitoringForRegion = function(result){
         document.getElementById("log").innerHTML = 
         'Searching for beacon... ';
+        // Update colour
+        $("body").removeClass("red").addClass("orange lighten-1");
+        $("#log").removeClass("red").addClass("orange lighten-5");
+        $("#mainContent").removeClass("red").addClass("orange lighten-5");
+        $("#latLon").removeClass("red").addClass("orange lighten-4");
+        $("#gauge").removeClass("red").addClass("orange lighten-4");
+        $("#info").removeClass("red").addClass("orange lighten-5");
     }
     
     // When the device has entered or exited the beacon region 
@@ -78,6 +99,15 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
             // This is done so watching location is only done when near 
             // the Bluetooth beacon, which would be placed inside a vehicle. 
             // It doesn't make sense to do it anywhere else. 
+
+            // Update colour to blue 
+            $("body").removeClass("orange").addClass("blue lighten-1");
+            $("#log").removeClass("orange").addClass("blue lighten-5");
+            $("#mainContent").removeClass("orange").addClass("blue lighten-5");
+            $("#latLon").removeClass("orange").addClass("blue lighten-4");
+            $("#gauge").removeClass("orange").addClass("blue lighten-4");
+            $("#info").removeClass("orange").addClass("blue lighten-5");
+
             document.getElementById("log").innerHTML = 
             'In beacon region';
             // watchingPosition false by default
@@ -134,7 +164,7 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
 // When location is successfully retrieved
 var onSuccess = function(position){
     // Multiply m/s by 3.6 to get km/h 
-    km = position.coords.speed * 3.6;
+    km = Math.round(position.coords.speed * 3.6);
     // Increment update 
     updates++;
     // Update text

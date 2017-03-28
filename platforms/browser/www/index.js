@@ -9,6 +9,17 @@ var watchingPosition = false;
 // This function is called when device is ready
 function onDeviceReady(){
 
+    // Make the body red
+    $("body").removeClass("grey").addClass("red lighten-1");
+    $("#log").removeClass("grey").addClass("red lighten-5");
+    $("#mainContent").removeClass("grey").addClass("red lighten-5").hide();
+    $("#latLon").removeClass("grey").addClass("red lighten-4");
+    $("#gauge").removeClass("grey").addClass("red lighten-4");
+    $("#info").removeClass("grey").addClass("red lighten-5").hide();
+
+    // Build speed gauge
+    buildGauge();
+
     // Add pause event listener for when app is in background 
     document.addEventListener("pause", onAppPause, false);
 
@@ -35,6 +46,9 @@ function onDeviceReady(){
             });
         }
     });
+}
+
+function buildGauge(){
 }
 
 // This function is called when the app is put to background or minimised
@@ -67,9 +81,15 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
 
     // When the device actively starts looking for the beacon region 
     delegate.didStartMonitoringForRegion = function(result){
-        document.getElementById("log").innerText = 
-        "Searching for beacon... " + 
-        "<i class='small material-icons'>bluetooth_searching</i>";
+        document.getElementById("log").innerHTML = 
+        'Searching for beacon... ';
+        // Update colour
+        $("body").removeClass("red").addClass("orange lighten-1");
+        $("#log").removeClass("red").addClass("orange lighten-5");
+        $("#mainContent").removeClass("red").addClass("orange lighten-5");
+        $("#latLon").removeClass("red").addClass("orange lighten-4");
+        $("#gauge").removeClass("red").addClass("orange lighten-4");
+        $("#info").removeClass("red").addClass("orange lighten-5");
     }
     
     // When the device has entered or exited the beacon region 
@@ -79,9 +99,17 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
             // This is done so watching location is only done when near 
             // the Bluetooth beacon, which would be placed inside a vehicle. 
             // It doesn't make sense to do it anywhere else. 
-            document.getElementById("log").innerText = 
-            "In beacon's region" + 
-            "<i class='small material-icons'>bluetooth_connected</i>";
+
+            // Update colour to blue 
+            $("body").removeClass("orange").addClass("blue lighten-1");
+            $("#log").removeClass("orange").addClass("blue lighten-5");
+            $("#mainContent").removeClass("orange").addClass("blue lighten-5");
+            $("#latLon").removeClass("orange").addClass("blue lighten-4");
+            $("#gauge").removeClass("orange").addClass("blue lighten-4");
+            $("#info").removeClass("orange").addClass("blue lighten-5");
+
+            document.getElementById("log").innerHTML = 
+            'In beacon region';
             // watchingPosition false by default
             // so if not watchingPosition
             if(!watchingPosition){
@@ -101,8 +129,7 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
             // This only works once you initially enter a beacon region 
             // then leave it. Once you leave the region there is no need
             // to monitor the user's location. 
-            document.getElementById("log").innerText = "Left beacon's region"
-            + "<i class='small material-icons'>bluetooth_searching</i>";
+            document.getElementById("log").innerHTML = 'Left beacon region';
             // If you are watchingPosition
             if(watchingPosition){
                 // watchingPosition to false
@@ -130,21 +157,21 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
 
     // Start monitoring for mint beacon 
     cordova.plugins.locationManager.startMonitoringForRegion(mintRegion)
-        .fail(function(e) { alert(e); })
+        .fail(function(e) { alert("BLE Error: " + e); })
         .done();
 }
 
 // When location is successfully retrieved
 var onSuccess = function(position){
     // Multiply m/s by 3.6 to get km/h 
-    km = position.coords.speed * 3.6;
+    km = Math.round(position.coords.speed * 3.6);
     // Increment update 
     updates++;
     // Update text
     document.getElementById("info").innerHTML = 
         'Update '     + updates;
     document.getElementById("mainContent").innerHTML = 
-        '<i class="small material-icons">location_searching</i> Geolocation <br>' +
+        'Geolocation <br>' +
         'Latitude: '    + position.coords.latitude + '<br>' +
         'Longitude: '   + position.coords.longitude + '<br>' +
         'Speed: ' + km + ' km/h <br>';
