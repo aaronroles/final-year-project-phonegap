@@ -71,14 +71,6 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
     // Create delegate object that holds beacon callback functions.
     var delegate = new cordova.plugins.locationManager.Delegate();
 
-    // Update colour
-        $("body").removeClass("red").addClass("orange lighten-1");
-        $("#bluetoothState").removeClass("red").addClass("orange lighten-5");
-        $("#mainContent").removeClass("red hide").addClass("orange lighten-5");
-        $("#latLon").removeClass("red hide").addClass("orange lighten-4");
-        $("#gauge").removeClass("red hide").addClass("orange lighten-4");
-        $("#info").removeClass("red hide").addClass("orange lighten-5");
-
     // When the device actively starts looking for the beacon region 
     delegate.didStartMonitoringForRegion = function(result){
         document.getElementById("bluetoothState").innerHTML = 
@@ -92,14 +84,6 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
             // This is done so watching location is only done when near 
             // the Bluetooth beacon, which would be placed inside a vehicle. 
             // It doesn't make sense to do it anywhere else. 
-
-            // Update colour to blue 
-            $("body").removeClass("orange").addClass("blue lighten-1");
-            $("#bluetoothState").removeClass("orange").addClass("blue lighten-5");
-            $("#mainContent").removeClass("orange").addClass("blue lighten-5");
-            $("#latLon").removeClass("orange").addClass("blue lighten-4");
-            $("#gauge").removeClass("orange").addClass("blue lighten-4");
-            $("#info").removeClass("orange").addClass("blue lighten-5");
 
             document.getElementById("bluetoothState").innerHTML = 
             'In beacon region';
@@ -123,13 +107,6 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
             // then leave it. Once you leave the region there is no need
             // to monitor the user's location. 
 
-            // Update colour
-            $("body").removeClass("blue").addClass("orange lighten-1");
-            $("#bluetoothState").removeClass("blue").addClass("orange lighten-5");
-            $("#mainContent").removeClass("blue").addClass("orange lighten-5");
-            $("#latLon").removeClass("blue").addClass("orange lighten-4");
-            $("#gauge").removeClass("blue").addClass("orange lighten-4");
-            $("#info").removeClass("blue").addClass("orange lighten-5");
             document.getElementById("bluetoothState").innerHTML = 'Left beacon region';
             // If you are watchingPosition
             if(watchingPosition){
