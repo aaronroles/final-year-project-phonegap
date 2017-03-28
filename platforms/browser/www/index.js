@@ -9,14 +9,6 @@ var watchingPosition = false;
 // This function is called when device is ready
 function onDeviceReady(){
 
-    // Make the body red
-    $("body").removeClass("grey").addClass("red lighten-1");
-    $("#log").removeClass("grey").addClass("red lighten-5");
-    $("#mainContent").removeClass("grey").addClass("red lighten-5").hide();
-    $("#latLon").removeClass("grey").addClass("red lighten-4");
-    $("#gauge").removeClass("grey").addClass("red lighten-4");
-    $("#info").removeClass("grey").addClass("red lighten-5").hide();
-
     // Build speed gauge
     buildGauge();
 
@@ -41,7 +33,7 @@ function onDeviceReady(){
                 }
                 // If it is still not allowed 
                 else{
-                    document.getElementById("log").innerText = "Notifications are not allowed";
+                    document.getElementById("info").innerText = "Notifications are not allowed";
                 }
             });
         }
@@ -81,15 +73,15 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
 
     // When the device actively starts looking for the beacon region 
     delegate.didStartMonitoringForRegion = function(result){
-        document.getElementById("log").innerHTML = 
+        document.getElementById("bluetoothState").innerHTML = 
         'Searching for beacon... ';
         // Update colour
         $("body").removeClass("red").addClass("orange lighten-1");
-        $("#log").removeClass("red").addClass("orange lighten-5");
-        $("#mainContent").removeClass("red").addClass("orange lighten-5");
-        $("#latLon").removeClass("red").addClass("orange lighten-4");
-        $("#gauge").removeClass("red").addClass("orange lighten-4");
-        $("#info").removeClass("red").addClass("orange lighten-5");
+        $("#bluetoothState").removeClass("red").addClass("orange lighten-5");
+        $("#mainContent").removeClass("red hide").addClass("orange lighten-5");
+        $("#latLon").removeClass("red hide").addClass("orange lighten-4");
+        $("#gauge").removeClass("red hide").addClass("orange lighten-4");
+        $("#info").removeClass("red hide").addClass("orange lighten-5");
     }
     
     // When the device has entered or exited the beacon region 
@@ -102,13 +94,13 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
 
             // Update colour to blue 
             $("body").removeClass("orange").addClass("blue lighten-1");
-            $("#log").removeClass("orange").addClass("blue lighten-5");
+            $("#bluetoothState").removeClass("orange").addClass("blue lighten-5");
             $("#mainContent").removeClass("orange").addClass("blue lighten-5");
             $("#latLon").removeClass("orange").addClass("blue lighten-4");
             $("#gauge").removeClass("orange").addClass("blue lighten-4");
             $("#info").removeClass("orange").addClass("blue lighten-5");
 
-            document.getElementById("log").innerHTML = 
+            document.getElementById("bluetoothState").innerHTML = 
             'In beacon region';
             // watchingPosition false by default
             // so if not watchingPosition
@@ -129,7 +121,15 @@ function createBeaconAndMonitor(identifier, uuid, major, minor){
             // This only works once you initially enter a beacon region 
             // then leave it. Once you leave the region there is no need
             // to monitor the user's location. 
-            document.getElementById("log").innerHTML = 'Left beacon region';
+
+            // Update colour
+            $("body").removeClass("blue").addClass("orange lighten-1");
+            $("#bluetoothState").removeClass("blue").addClass("orange lighten-5");
+            $("#mainContent").removeClass("blue").addClass("orange lighten-5");
+            $("#latLon").removeClass("blue").addClass("orange lighten-4");
+            $("#gauge").removeClass("blue").addClass("orange lighten-4");
+            $("#info").removeClass("blue").addClass("orange lighten-5");
+            document.getElementById("bluetoothState").innerHTML = 'Left beacon region';
             // If you are watchingPosition
             if(watchingPosition){
                 // watchingPosition to false
@@ -197,5 +197,5 @@ var onSuccess = function(position){
 
 // When there is an error with location 
 var onError = function(error){
-    document.getElementById("log").innerText = error.message;
+    document.getElementById("info").innerText = error.message;
 }

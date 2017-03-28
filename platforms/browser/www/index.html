@@ -8,18 +8,22 @@
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"/>
         <title>Aaron's App</title>
     </head>
-    <body class="container grey">
+
+    <body class="container red">
+
         <div>
-            <div class="card-panel grey lighten-5 center-align flow-text" id="log">Waiting for bluetooth to be enabled...</div>
-            <div class="card medium grey lighten-5 center-align flow-text" id="mainContent">
-                <div class="card-panel grey lighten-4 center-align flow-text" id="latLon">Speedometer</div>
-                <div class="card small grey lighten-4 center-align flow-text" id="gauge">Gauge</div>
+            <div class="card-panel red lighten-5 center-align flow-text" id="bluetoothState">Waiting for bluetooth to be enabled...</div>
+            <div class="card medium red lighten-5 center-align flow-text hide" id="mainContent">
+                <div class="card-panel red lighten-4 center-align flow-text hide" id="latLon">Speedometer</div>
+                <div class="card small red lighten-4 center-align flow-text hide" id="gauge">Gauge</div>
             </div>
-            <div class="card-panel grey lighten-5 center-align flow-text" id="info">Update 0</div>
+            <div class="card-panel red lighten-5 center-align flow-text hide" id="info">Update 0</div>
         </div>
+
         <script type="text/javascript" src="index.js"></script>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
         <script type="text/javascript" src="js/materialize.min.js"></script>
+
     </body>
 </html>
