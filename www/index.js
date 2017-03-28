@@ -2,15 +2,39 @@
 // Add event listener to handle when the device is ready to go
 document.addEventListener("deviceready", onDeviceReady, false);
 
+// Create customised options for gauge 
+var opts = {
+  lines: 12,
+  angle: 0.10,
+  lineWidth: 0.44,
+  pointer: {
+    length: 0.5,
+    strokeWidth: 0.035,
+    color: '#000000'
+  },
+  limitMax: 'true', 
+  percentColors: [[0.0, "#13e500" ], [0.5, "#d2c300"], [1.0, "#bf0008"]], // !!!!
+  strokeColor: '#E0E0E0',
+  generateGradient: true,
+  highDpiSupport: true,
+  staticLabels: {
+    font: "14px sans-serif",  // Specifies font
+    labels: [0, 25, 50, 75, 100, 125, 150],  // Print labels at these values
+    color: "#000000" // Optional: Label text color
+  }
+};
+
+var target = document.getElementById('gauge');
+var gauge = new Gauge(target).setOptions(opts);
+gauge.maxValue = 150;
+gauge.animationSpeed = 50;
+
 var updates = 0;
 var km = 0;
 var watchingPosition = false;
 
 // This function is called when device is ready
 function onDeviceReady(){
-
-    // Build speed gauge
-    buildGauge();
 
     // Add pause event listener for when app is in background 
     document.addEventListener("pause", onAppPause, false);
@@ -148,11 +172,9 @@ var onSuccess = function(position){
     // Update text
     document.getElementById("info").innerHTML = 
         'Update '     + updates;
-    document.getElementById("mainContent").innerHTML = 
-        'Geolocation <br>' +
-        'Latitude: '    + position.coords.latitude + '<br>' +
-        'Longitude: '   + position.coords.longitude + '<br>' +
-        'Speed: ' + km + ' km/h <br>';
+    document.getElementById("speedometer").innerHTML = 
+        'You are driving at ' + km + ' km per hour';
+    gauge.set(km);
 
         // If speed greater than 10
         if(km > 10){
