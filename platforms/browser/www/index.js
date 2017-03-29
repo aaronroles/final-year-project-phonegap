@@ -33,6 +33,7 @@ gauge.set(0);
 var updates = 0;
 var km = 0;
 var watchingPosition = false;
+var allowLock = true;
 
 // This function is called when device is ready
 function onDeviceReady(){
@@ -63,9 +64,6 @@ function onDeviceReady(){
             });
         }
     });
-}
-
-function buildGauge(){
 }
 
 // This function is called when the app is put to background or minimised
@@ -178,11 +176,14 @@ var onSuccess = function(position){
     gauge.set(km);
 
         // If speed greater than 10
-        if(km > 10){
+        // and allowLock is true
+        if(km > 10 && allowLock){
             // Lock the phone
             window.forceLock.lock(
                 function(){
                     // success
+                    // allowLock to false to stop repeating locks
+                    allowLock = false;
                     // Send notification
                     cordova.plugins.notification.local.schedule({
                         title: "Warning!",
@@ -193,6 +194,12 @@ var onSuccess = function(position){
                     // error 
                     alert("error: " + e);
                 })
+        }
+        // Else if moving at 10km or less
+        // and not allowed to lock
+        else if(km <= 10 && !allowLock){
+            // allowLock to be true again
+            allowLock = true;
         }
 }
 
