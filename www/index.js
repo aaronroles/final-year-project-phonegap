@@ -2,7 +2,7 @@
 // Add event listener to handle when the device is ready to go
 document.addEventListener("deviceready", onDeviceReady, false);
 
-// Create customised options for gauge 
+// Create customised options for gauge using gauge.min.js
 var opts = {
   lines: 12,
   angle: 0.10,
@@ -14,7 +14,7 @@ var opts = {
   },
   limitMax: 'true', 
   percentColors: [[0.0, "#13e500" ], [0.5, "#d2c300"], [1.0, "#bf0008"]], // !!!!
-  strokeColor: '#E0E0E0',
+  strokeColor: '#bbdefb',
   generateGradient: true,
   highDpiSupport: true,
   staticLabels: {
@@ -28,6 +28,7 @@ var target = document.getElementById('gauge');
 var gauge = new Gauge(target).setOptions(opts);
 gauge.maxValue = 150;
 gauge.animationSpeed = 50;
+gauge.set(0);
 
 var updates = 0;
 var km = 0;
