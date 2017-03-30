@@ -13,22 +13,22 @@ var opts = {
     color: '#000000'
   },
   limitMax: 'true', 
-  percentColors: [[0.0, "#13e500" ], [0.5, "#d2c300"], [1.0, "#bf0008"]], // !!!!
+  percentColors: [[0.0, "#00a878" ], [0.9, "#00a878"], [1.0, "#fe4a49"]],
   strokeColor: '#bbdefb',
-  generateGradient: true,
+  generateGradient: false,
   highDpiSupport: true,
   staticLabels: {
     font: "14px sans-serif",  // Specifies font
-    labels: [0, 25, 50, 75, 100, 125, 150],  // Print labels at these values
+    labels: [0, 5, 10],  // Print labels at these values
     color: "#000000" // Optional: Label text color
   }
 };
 
 var target = document.getElementById('gauge');
 var gauge = new Gauge(target).setOptions(opts);
-gauge.maxValue = 150;
-gauge.animationSpeed = 50;
-gauge.set(0);
+gauge.maxValue = 10;
+gauge.animationSpeed = 40;
+gauge.set(10);
 
 var updates = 0;
 var km = 0;
@@ -85,7 +85,7 @@ var initResult = function(result){
     }
     else{
         // Otherwise we have a problem with Bluetooth
-        alert("Bluetooth error");
+        //alert("Bluetooth error");
     }
 }
 
@@ -169,15 +169,13 @@ var onSuccess = function(position){
     // Increment update 
     updates++;
     // Update text
-    document.getElementById("info").innerHTML = 
-        'Update '     + updates;
     document.getElementById("speedometer").innerHTML = 
         'You are driving at ' + km + ' km per hour';
     gauge.set(km);
 
         // If speed greater than 10
         // and allowLock is true
-        if(km > 10 && allowLock){
+        if(km >= 10 && allowLock){
             // Lock the phone
             window.forceLock.lock(
                 function(){
@@ -197,7 +195,7 @@ var onSuccess = function(position){
         }
         // Else if moving at 10km or less
         // and not allowed to lock
-        else if(km <= 10 && !allowLock){
+        else if(km < 10 && !allowLock){
             // allowLock to be true again
             allowLock = true;
         }

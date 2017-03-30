@@ -12,7 +12,7 @@
 
     <content src="index.html" />
     <access origin="*" />
-
+ 
     <plugin name="cordova-plugin-ibeacon" spec="3.4.0" />
     <plugin name="cordova-plugin-bluetoothle" spec="4.3.1"/>
     <plugin name="cordova-plugin-geolocation" spec="2.1.0" />
